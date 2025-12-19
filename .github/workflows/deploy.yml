@@ -192,11 +192,34 @@ jobs:
           fi
 
           echo "Waiting for service to be ready: $SERVICE_ARN"
-          aws apprunner wait service-running \
-            --service-arn $SERVICE_ARN \
-            --region ${{ env.AWS_REGION }}
 
-          echo "✅ Service is running and ready"
+          # Poll service status until it's RUNNING
+          MAX_ATTEMPTS=60
+          ATTEMPT=0
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            STATUS=$(aws apprunner describe-service \
+              --service-arn $SERVICE_ARN \
+              --region ${{ env.AWS_REGION }} \
+              --query 'Service.Status' \
+              --output text)
+
+            echo "Current status: $STATUS (attempt $((ATTEMPT + 1))/$MAX_ATTEMPTS)"
+
+            if [ "$STATUS" == "RUNNING" ]; then
+              echo "✅ Service is running and ready!"
+              exit 0
+            elif [ "$STATUS" == "CREATE_FAILED" ] || [ "$STATUS" == "UPDATE_FAILED" ]; then
+              echo "❌ Service deployment failed with status: $STATUS"
+              exit 1
+            fi
+
+            sleep 10
+            ATTEMPT=$((ATTEMPT + 1))
+          done
+
+          echo "❌ Timeout waiting for service to be ready"
+          exit 1
 
       - name: Get Service URL
         id: get-url
