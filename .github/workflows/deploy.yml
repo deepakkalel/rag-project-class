@@ -116,10 +116,10 @@ jobs:
                     "LANGSMITH_PROJECT": "rag-qa-production-system",
                     "LANGSMITH_ENDPOINT": "https://eu.api.smith.langchain.com"
                   }
-                },
-                "AuthenticationConfiguration": {
-                  "AccessRoleArn": "${{ secrets.APP_RUNNER_ECR_ACCESS_ROLE_ARN }}"
                 }
+              },
+              "AuthenticationConfiguration": {
+                "AccessRoleArn": "${{ secrets.APP_RUNNER_ECR_ACCESS_ROLE_ARN }}"
               },
               "AutoDeploymentsEnabled": false
             }' \
@@ -167,10 +167,10 @@ jobs:
                     "LANGSMITH_PROJECT": "rag-qa-production-system",
                     "LANGSMITH_ENDPOINT": "https://eu.api.smith.langchain.com"
                   }
-                },
-                "AuthenticationConfiguration": {
-                  "AccessRoleArn": "${{ secrets.APP_RUNNER_ECR_ACCESS_ROLE_ARN }}"
                 }
+              },
+              "AuthenticationConfiguration": {
+                "AccessRoleArn": "${{ secrets.APP_RUNNER_ECR_ACCESS_ROLE_ARN }}"
               },
               "AutoDeploymentsEnabled": false
             }' \
