@@ -8,9 +8,16 @@ FROM python:3.13-slim AS builder
 WORKDIR /app
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+#RUN apt-get update && apt-get install -y --no-install-recommends \
+#    build-essential \
+#    && rm -rf /var/lib/apt/lists/*
+
+#updated as per agent suggestion to include retries
+ENV DEBIAN_FRONTEND=noninteractive                         
+RUN apt-get update -o Acquire::Retries=3 && \
+    apt-get install -y --no-install-recommends ca-certificates git && \
+    rm -rf /var/lib/apt/lists/*
+
 
 # Copy requirements first for better caching
 COPY requirements.txt .
@@ -28,9 +35,11 @@ FROM python:3.13-slim AS production
 WORKDIR /app
 
 # Install git (required by RAGAS/datasets library)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    && rm -rf /var/lib/apt/lists/*
+#updated as per agent suggestion to include retries
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update -o Acquire::Retries=3 && \
+    apt-get install -y --no-install-recommends ca-certificates git && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
