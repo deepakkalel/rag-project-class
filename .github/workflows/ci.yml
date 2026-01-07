@@ -1,3 +1,4 @@
+# when we do changes in ci file and commit changes in github it will trigger the ci pipeline 
 # ==================================================
 # RAG Q&A System - Simplified CI Pipeline
 # ==================================================
