@@ -12,7 +12,7 @@ on:
 env:
   AWS_REGION: us-east-1                       #change region if needed
   ECR_REPOSITORY: rag-qa-system               #change repository name as per aws ecr if needed
-  APP_RUNNER_SERVICE: rag-qa-app-hybrid       #change app runner service name if needed
+  APP_RUNNER_SERVICE: rag-qa-app-test         #change app runner service name if needed (similar to app runner service name while creting app runner service manually)
 
 jobs:
   # ============================================
@@ -46,6 +46,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build Docker image
+          # here we have two tags one with commit sha and other latest (we can use either while deploying to app runner) 
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .     
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
 
@@ -81,8 +82,9 @@ jobs:
       - name: Check if App Runner service exists
         id: check-service
         run: |
-          SERVICE_ARN=$(aws apprunner list-services --region us-east-1 \ 
-            --query "ServiceSummaryList[?ServiceName=='rag-qa-app-hybrid'].ServiceArn" \ 
+          SERVICE_ARN=$(aws apprunner list-services --region ${{ env.AWS_REGION }} \
+            #if service exists get its arn (arn means amazon resource name) otherwise empty
+            --query "ServiceSummaryList[?ServiceName=='${{ env.APP_RUNNER_SERVICE }}'].ServiceArn" \
             --output text)
 
           if [ -z "$SERVICE_ARN" ]; then
@@ -127,6 +129,7 @@ jobs:
             }' \
             #we can adjust instance configuration as per need, here we are using 1vCPU & 2GB memory (which is suitable for small apps)
             --instance-configuration '{
+             # we can choose different cpu and memory configurations as per our need, for this 1vcpu and 2gb ram is sufficient
               "Cpu": "1 vCPU",
               "Memory": "2 GB"
             }' \
