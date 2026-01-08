@@ -81,9 +81,8 @@ jobs:
       - name: Check if App Runner service exists
         id: check-service
         run: |
-          SERVICE_ARN=$(aws apprunner list-services --region ${{ env.AWS_REGION }} \
-            #if service exists get its arn (arn means amazon resource name) otherwise empty
-            --query "ServiceSummaryList[?ServiceName=='${{ env.APP_RUNNER_SERVICE }}'].ServiceArn" \
+          SERVICE_ARN=$(aws apprunner list-services --region us-east-1 \ 
+            --query "ServiceSummaryList[?ServiceName=='rag-qa-app-hybrid'].ServiceArn" \ 
             --output text)
 
           if [ -z "$SERVICE_ARN" ]; then
