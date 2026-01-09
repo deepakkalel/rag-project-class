@@ -1,5 +1,5 @@
 # ==================================================
-# RAG Q&A System-CD Pipeline (ECR + App Runner)
+# RAG Q&A System - CD Pipeline (ECR + App Runner)
 # ==================================================
 
 name: CD - Deploy to AWS
@@ -10,25 +10,25 @@ on:
   workflow_dispatch:  # Allow manual trigger
 
 env:
-  AWS_REGION: us-east-1                       #change region if needed
-  ECR_REPOSITORY: rag-qa-system               #change repository name as per aws ecr if needed
-  APP_RUNNER_SERVICE: rag-qa-app-test1         #change app runner service name if needed (similar to app runner service name while creting app runner service manually)
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: rag-qa-system
+  APP_RUNNER_SERVICE: rag-qa-app-test1
 
 jobs:
   # ============================================
-  # Build image and Push to ECR
+  # Build and Push to ECR
   # ============================================
   build-and-push:
     name: Build & Push to ECR
     runs-on: ubuntu-latest
     outputs:
-      image_uri: ${{ steps.build-image.outputs.image_uri }}          #step will be reflected in github outputs variable
+      image_uri: ${{ steps.build-image.outputs.image_uri }}
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials                              #present in github secrets
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
@@ -46,8 +46,7 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           # Build Docker image
-          # here we have two tags one with commit sha and other latest (we can use either while deploying to app runner) 
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .     
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
 
           # Push both tags
@@ -77,13 +76,11 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      #till this step its same as above (Build image and Push to ECR)
 
       - name: Check if App Runner service exists
         id: check-service
         run: |
           SERVICE_ARN=$(aws apprunner list-services --region ${{ env.AWS_REGION }} \
-            #if service exists get its arn (arn means amazon resource name) otherwise empty
             --query "ServiceSummaryList[?ServiceName=='${{ env.APP_RUNNER_SERVICE }}'].ServiceArn" \
             --output text)
 
@@ -96,7 +93,6 @@ jobs:
             echo "Service exists: $SERVICE_ARN"
           fi
 
-      #earlier due to error in env file hence creating and updating service separately
       - name: Create App Runner service (if not exists)
         if: steps.check-service.outputs.exists == 'false'
         id: create-service
@@ -127,9 +123,7 @@ jobs:
               },
               "AutoDeploymentsEnabled": false
             }' \
-            #we can adjust instance configuration as per need, here we are using 1vCPU & 2GB memory (which is suitable for small apps)
             --instance-configuration '{
-             # we can choose different cpu and memory configurations as per our need, for this 1vcpu and 2gb ram is sufficient
               "Cpu": "1 vCPU",
               "Memory": "2 GB"
             }' \
@@ -145,7 +139,7 @@ jobs:
 
           SERVICE_ARN=$(cat service-output.json | jq -r '.Service.ServiceArn')
           SERVICE_URL=$(cat service-output.json | jq -r '.Service.ServiceUrl')
-          #echo means to write output variable to github output (like printing in console)
+
           echo "service_arn=$SERVICE_ARN" >> $GITHUB_OUTPUT
           echo "service_url=$SERVICE_URL" >> $GITHUB_OUTPUT
           echo "✅ Service created: $SERVICE_ARN"
