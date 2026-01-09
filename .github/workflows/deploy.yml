@@ -1,5 +1,5 @@
 # ==================================================
-# RAG Q&A System - CD Pipeline (ECR + App Runner)
+# RAG Q&A System-CD Pipeline (ECR + App Runner)
 # ==================================================
 
 name: CD - Deploy to AWS
