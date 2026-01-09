@@ -12,7 +12,7 @@ on:
 env:
   AWS_REGION: us-east-1                       #change region if needed
   ECR_REPOSITORY: rag-qa-system               #change repository name as per aws ecr if needed
-  APP_RUNNER_SERVICE: rag-qa-app-test         #change app runner service name if needed (similar to app runner service name while creting app runner service manually)
+  APP_RUNNER_SERVICE: rag-qa-app-test1         #change app runner service name if needed (similar to app runner service name while creting app runner service manually)
 
 jobs:
   # ============================================
